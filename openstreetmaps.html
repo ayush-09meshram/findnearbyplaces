@@ -17,6 +17,8 @@
         #search-results { border: 1px solid #ccc; max-height: 200px; overflow-y: auto; position: absolute; background: white; width: 300px; display: none; }
         #search-results div { padding: 5px; cursor: pointer; }
         #search-results div:hover { background: #f0f0f0; }
+        #pagination { margin-top: 10px; }
+        #pagination button { padding: 5px 10px; margin: 2px; }
     </style>
 </head>
 <body>
@@ -41,7 +43,11 @@
         </thead>
         <tbody></tbody>
     </table>
-    <button onclick="loadMoreResults()">Load More</button>
+    <div id="pagination">
+        <button onclick="prevPage()">&#9665; Prev</button>
+        <span id="page-info">Page 1</span>
+        <button onclick="nextPage()">Next &#9655;</button>
+    </div>
     
     <script>
         let map, userLocation, placesData = [], currentPage = 0, pageSize = 5;
@@ -68,7 +74,7 @@
                 .then(data => {
                     placesData = data.map(place => ({
                         ...place,
-                        distance: calculateDistance(userLocation[0], userLocation[1], place.lat, place.lon) / 1000,
+                        distance: calculateDistance(userLocation[0], userLocation[1], place.lat, place.lon),
                         temperature: Math.random() * 15 + 15 
                     }));
                     sortPlaces();
@@ -102,6 +108,7 @@
                 `;
                 tableBody.appendChild(row);
             });
+            document.getElementById("page-info").innerText = `Page ${currentPage + 1}`;
         }
         
         function updateMapMarkers() {
@@ -120,9 +127,18 @@
             });
         }
         
-        function loadMoreResults() {
-            currentPage++;
-            displayPlaces();
+        function nextPage() {
+            if ((currentPage + 1) * pageSize < placesData.length) {
+                currentPage++;
+                displayPlaces();
+            }
+        }
+        
+        function prevPage() {
+            if (currentPage > 0) {
+                currentPage--;
+                displayPlaces();
+            }
         }
         
         function sortPlaces() {
